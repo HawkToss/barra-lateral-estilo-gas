@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.2/font/bootstrap-icons.css">
+  </head>
+  <body class="bg-dark">
+
+    <img class="img-fluid p-3" src="https://aulaenlanube.com/wp-content/uploads/2021/03/Logo-CABECERA-web-1-1024x280.png">
+    
+    <div class="d-flex flex-column m-2 align-items-center">
+
+      <!-- CAJA CON TODOS LOS ESTILOS -->
+
+      <div id = "cajaEstilos">
+ 
+        <!-- Estilo1 -->
+        <div id="estilo1"> 
+          <button class="boton1 btn btn-primary m-2" onclick="guardarEstilo(1)"><i class="bi bi-emoji-heart-eyes-fill"></i></button>
+          <button class="boton1 btn btn-primary m-2" onclick="google.script.run.aplicarEstilo(1)"> Aplicar estilo 1 </button>
+        </div>
+
+        <!-- Estilo2 -->
+        <div id="estilo2">
+          <button class="boton2 btn btn-primary m-2" onclick="guardarEstilo(2)"><i class="bi bi-emoji-heart-eyes-fill"></i> </button>
+          <button class="boton2 btn btn-primary m-2" onclick="google.script.run.aplicarEstilo(2)"> Aplicar estilo 2 </button>
+        </div>
+      </div>
+
+      <!-- Borrar -->
+      <div class="mt-5">
+        <button class="btn btn-success" onclick="agregarEstilo()"><i class="bi bi-plus-circle"></i></button>
+        <button class="btn btn-warning m-2" onclick="google.script.run.borrarEstilo()"> Borrar Estilos </button>
+        <button class="btn btn-danger m-2" onclick="google.script.run.borrarTodo()"><i class="bi bi-emoji-heart-eyes-fill"></i> </button>
+      </div>
+
+
+    </div>
+
+    <script>
+      //cantidad de estilos iniciales
+      var estiloActual = 3;
+
+      function agregarEstilo()
+      {
+        //creamos el div con el id del estilo
+        let div = document.createElement("div");
+        div.id = "estilo"+estiloActual;
+        const numActual = estiloActual;
+        estiloActual++;
+
+        //boton aplicar estilo
+        //define la variable button, elige la clase, color, le pone el name, y el onclick el mismo que el estilo1 2
+        let boton = document.createElement("button");
+        boton.classList.add("btn","btn-primary","m-2","boton"+numActual);
+        boton.textContent = "Aplicar estilo "+numActual; 
+        boton.onclick = () => google.script.run.aplicarEstilo(numActual);
+
+        //boton guardar estilo
+
+        let botonPlus = document.createElement("button");
+        botonPlus.classList.add("btn","btn-primary","boton"+numActual);
+        botonPlus.onclick = () => { 
+                                    google.script.run.withSuccessHandler(
+                                    function(obj)
+                                    {
+                                        let botones = document.getElementsByClassName("boton"+numActual);
+                                        Array.from(botones).forEach(boton => {
+                                          boton.style.color = obj.colorLetra;
+                                          boton.style.backgroundColor = obj.colorFondo;
+                                        });
+                                      }).guardarEstilo(numActual);
+                                  };
+
+        //boton borrar estilo
+        let botonBorrar = document.createElement("button");
+        botonBorrar.classList.add("btn","btn-danger");
+        botonBorrar.onclick = () => {
+                                        document.getElementById("estilo"+numActual).remove();
+                                        google.script.run.borrarEstilo(numActual);
+                                      }
+
+        //icono +
+        let iconoPlus = document.createElement("i");
+        iconoPlus.classList.add("bi","bi-plus-circle");
+
+        //icono borrar
+        let iconoBorrar = document.createElement("i");
+        iconoBorrar.classList.add("bi","bi-trash");
+
+        //agregar iconos a los botones
+
+        botonBorrar.appendChild(iconoBorrar);
+        botonPlus.appendChild(iconoPlus);
+
+        //agregar Elementos al div
+        div.appendChild(botonPlus);
+        div.appendChild(boton);
+        div.appendChild(botonBorrar);
+
+        //agregar el div al div donde estan todos los estilos
+        document.getElementById("cajaEstilos").appendChild(div);
+                                      
+      }
+
+
+      
+      
+      function guardarEstilo(numEstilo)
+      {
+        google.script.run.withSuccessHandler(
+          function(obj)
+          {
+              let botones = document.getElementsByClassName("boton"+numEstilo);
+              Array.from(botones).forEach(boton => {
+                boton.style.color = obj.colorLetra;
+                boton.style.backgroundColor = obj.colorFondo;
+                });
+            }).guardarEstilo(numEstilo);
+      }
+ 
+      window.onload = function()
+      {
+        google.script.run.withSuccessHandler(
+          function(obj)
+          {
+            Object.keys(obj).forEach(propiedad => {
+
+              //si es el color de fondo
+              if(propiedad.slice(0,10)=="colorFondo")
+              {
+                let botones = document.getElementsByClassName("boton"+propiedad.slice(10));
+                Array.from(botones).forEach(boton => boton.style.backgroundColor = obj[propiedad]);
+                }
+              else if(propiedad.slice(0,10) == "colorLetra")
+                {
+                let botones = document.getElementsByClassName("boton"+propiedad.slice(10));
+                Array.from(botones).forEach(boton => boton.style.color = obj[propiedad]);
+                }
+
+              })
+
+            }).cargarEstilos();        
+
+
+
+      }
+    
+    </script>
+
+
+  </body>
+</html>
+
+
+
+
+
+
+
